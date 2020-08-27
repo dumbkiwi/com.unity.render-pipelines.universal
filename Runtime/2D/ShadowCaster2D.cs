@@ -81,6 +81,10 @@ namespace UnityEngine.Experimental.Rendering.Universal
             return m_ApplyToSortingLayers != null ? Array.IndexOf(m_ApplyToSortingLayers, layer) >= 0 : false;
         }
 
+        private Vector3 vec2To3(Vector2 inputVector) {
+            return new Vector3(inputVector.x, inputVector.y, 0);
+        }
+
         private void Awake()
         {
             if (m_ApplyToSortingLayers == null)
@@ -97,7 +101,12 @@ namespace UnityEngine.Experimental.Rendering.Universal
             {
                 Collider2D collider = GetComponent<Collider2D>();
                 if (collider != null)
-                    bounds = collider.bounds;
+                    if (collider.GetType() == typeof(PolygonCollider2D)) {
+                        m_ShapePath = Array.ConvertAll<Vector2, Vector3>(((PolygonCollider2D)collider).GetPath(0), vec2To3);
+                        m_UseRendererSilhouette = false;
+                    } else {
+                        bounds = collider.bounds;
+                    }
             }
 
             Vector3 relOffset = bounds.center - transform.position;
